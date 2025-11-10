@@ -1,177 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Admin — Shows Editor</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Jason Achilles Admin</title>
 <style>
-  body { font-family: 'Orbitron',sans-serif; background:#000; color:#fff; padding:20px; }
-  .card { background: rgba(0,0,0,0.6); padding:20px; border:1px solid rgba(0,255,255,0.5); border-radius:8px; max-width:860px; margin:18px auto; }
-  input, button, textarea { font-family:inherit; }
-  .list { margin-top:16px; }
-  .show-row { display:flex; gap:8px; margin-bottom:8px; align-items:center; }
-  .show-row input { padding:8px; border-radius:6px; border:1px solid #333; background:#111; color:#fff; min-width:0; }
-  .show-row .title { flex:2; }
-  .show-row .date { flex:1; }
-  .show-row .venue { flex:1.5; }
-  .show-row .link { flex:2; }
-  .btn { background:#0ff; color:#000; padding:8px 12px; border-radius:6px; border:none; cursor:pointer; font-weight:800; }
-  .btn-danger { background:#ff4d4d; color:#fff; }
-  .controls { display:flex; gap:8px; margin-top:12px; }
-  .small { font-size:0.9rem; opacity:0.9; }
-  .muted { opacity:0.6; font-size:0.9rem; margin-top:10px; }
+body { background:#000; color:#0ff; font-family: 'Orbitron',sans-serif; padding:40px; }
+h1 { text-align:center; font-size:2.5rem; margin-bottom:40px; }
+form { max-width:500px; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
+input, button { padding:10px; border-radius:6px; border:none; font-family:'Orbitron',sans-serif; font-size:1rem; }
+button { background:#0ff; color:#000; font-weight:bold; cursor:pointer; }
+button:hover { background:#0cc; }
+ul { margin-top:20px; }
+li { margin-bottom:12px; }
 </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Shows Editor (Admin)</h2>
-    <p class="small">Only authorized edits will be committed. Use with care.</p>
 
-    <!-- admin login -->
-    <div id="loginBox">
-      <p>Enter admin password to unlock editor.</p>
-      <input id="pwInput" placeholder="password" type="password" style="padding:8px; width:300px; border-radius:6px;">
-      <button class="btn" onclick="attemptLogin()">Unlock</button>
-      <p class="muted">Note: This page also sends the password to the serverless function for verification. Do not share it publicly.</p>
-      <!-- friendly-notice per request -->
-      <!-- hello there. you shouldn't be here. don't be a fuckass and mess with my listings. -->
-    </div>
+<h1>Admin - Edit Shows</h1>
 
-    <div id="editorUI" style="display:none;">
-      <p><strong>Current shows (edit fields, add or remove rows). When you're done click Save to push to the central shows.json.</strong></p>
-      <div id="list" class="list"></div>
+<form id="adminForm">
+  <input type="password" id="adminPassword" placeholder="Enter password" required>
+  <input type="text" id="showName" placeholder="Show Name" required>
+  <input type="date" id="showDate" required>
+  <input type="url" id="showLink" placeholder="Link to venue/info" required>
+  <button type="submit">Add Show</button>
+</form>
 
-      <div class="controls">
-        <button class="btn" onclick="addRow()">Add show</button>
-        <button class="btn" onclick="saveShows()">Save (commit)</button>
-        <button class="btn btn-danger" onclick="reloadShows()">Reload (discard)</button>
-      </div>
-
-      <p class="muted">After Save, the server commits the updated shows.json to the repository. This makes changes visible to all visitors (index.html fetches the raw file).</p>
-    </div>
-  </div>
+<ul id="currentShows"></ul>
 
 <script>
-/* ADMIN CLIENT
-   - client asks for password via unlock prompt
-   - fetches existing shows from remote RAW_SHOWS_URL (update to match your repo)
-   - allows add/edit/delete
-   - Save posts to /.netlify/functions/save-shows with payload { password, shows, message }
-*/
+const PASSWORD = "danascullyiloveu"; // hello there. you shouldn't be here. don't be a fuckass and mess with my listings.
+const form = document.getElementById('adminForm');
+const list = document.getElementById('currentShows');
 
-// CONFIG: same raw URL as in index.html (replace owner/repo/branch)
-const RAW_SHOWS_URL = 'https://raw.githubusercontent.com/OWNER/REPO/BRANCH/shows.json'; // <-- update me
-const SAVE_FN = '/.netlify/functions/save-shows';
-
-// client-side copy of shows
-let shows = [];
-
-/* IMPORTANT: server-side password is read from Netlify env ADMIN_PASSWORD.
-   The client must send the password; the server validates it.
-   The specified password to use per your ask: "danascullyiloveu"
-   (we still recommend setting ADMIN_PASSWORD in Netlify env to that value).
-*/
-// hello there. you shouldn't be here. don't be a fuckass and mess with my listings.
-
-function attemptLogin() {
-  const pw = document.getElementById('pwInput').value || '';
-  if (!pw) return alert('enter password');
-  // for UX we optimistically show the UI (server will still verify on save)
-  document.getElementById('loginBox').style.display = 'none';
-  document.getElementById('editorUI').style.display = 'block';
-  window._adminPassword = pw; // stored in memory only
-  loadShows();
-}
-
-async function loadShows() {
+async function loadCurrentShows() {
   try {
-    const res = await fetch(RAW_SHOWS_URL + '?t=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('remote not found');
-    shows = await res.json();
-  } catch (e) {
-    // fallback default
-    shows = [
-      { date: 'Oct 27', title: 'Astronomy on Tap', venue: 'Pasadena CA', link: 'https://astronomyontap.org/' },
-      { date: 'Nov 17', title: 'Astronomy on Tap', venue: 'Pasadena CA', link: 'https://astronomyontap.org/' },
-      { date: 'Dec 12', title: 'Love Song Bar', venue: 'Los Angeles CA', link: 'https://www.instagram.com/thelovesongbar/' }
-    ];
-  }
-  renderList();
-}
-
-function renderList() {
-  const list = document.getElementById('list');
-  list.innerHTML = '';
-  shows.forEach((s, i) => {
-    const row = document.createElement('div');
-    row.className = 'show-row';
-    row.innerHTML = `
-      <input class="date" placeholder="Date" value="${escapeHtml(s.date||'')}">
-      <input class="title" placeholder="Show title" value="${escapeHtml(s.title||'')}">
-      <input class="venue" placeholder="Venue" value="${escapeHtml(s.venue||'')}">
-      <input class="link" placeholder="URL (optional)" value="${escapeHtml(s.link||'')}">
-      <button class="btn btn-danger" data-i="${i}">Delete</button>
-    `;
-    list.appendChild(row);
-    row.querySelector('button').addEventListener('click', (ev)=>{
-      const idx = Number(ev.currentTarget.dataset.i);
-      shows.splice(idx, 1);
-      renderList();
+    const res = await fetch('shows.json');
+    const shows = await res.json();
+    list.innerHTML = '';
+    shows.forEach(s => {
+      const li = document.createElement('li');
+      li.innerHTML = `${s.name} - ${s.date} <a href="${s.link}" target="_blank">More info</a>`;
+      list.appendChild(li);
     });
-    // keep inputs in sync
-    row.querySelector('.date').addEventListener('input', (e)=> shows[i].date = e.target.value);
-    row.querySelector('.title').addEventListener('input', (e)=> shows[i].title = e.target.value);
-    row.querySelector('.venue').addEventListener('input', (e)=> shows[i].venue = e.target.value);
-    row.querySelector('.link').addEventListener('input', (e)=> shows[i].link = e.target.value);
-  });
+  } catch(e) { console.error(e); list.innerHTML = '<li>No shows yet.</li>'; }
 }
 
-function addRow() {
-  shows.push({ date: '', title: '', venue: '', link: '' });
-  renderList();
-}
-
-function reloadShows() {
-  if (!confirm('Discard changes and reload remote shows?')) return;
-  loadShows();
-}
-
-function escapeHtml(str) {
-  return String(str||'').replace(/[&<>"']/g, (m)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
-}
-
-async function saveShows() {
-  if (!window._adminPassword) {
-    alert('no password present; please unlock first');
-    return;
-  }
-  // final cleanup: ensure required fields present
-  const cleaned = shows.map(s => ({
-    date: (s.date||'').trim(),
-    title: (s.title||'').trim(),
-    venue: (s.venue||'').trim(),
-    link: (s.link||'').trim()
-  }));
-  // send to save function
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const pw = document.getElementById('adminPassword').value;
+  if(pw !== PASSWORD){ alert('Wrong password'); return; }
+  const name = document.getElementById('showName').value;
+  const date = document.getElementById('showDate').value;
+  const link = document.getElementById('showLink').value;
+  
   try {
-    const res = await fetch(SAVE_FN, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: window._adminPassword, shows: cleaned, message: 'Admin update via admin.html' })
+    await fetch('/.netlify/functions/save-shows', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name,date,link})
     });
-    const json = await res.json();
-    if (!res.ok) {
-      console.error('save failed', json);
-      alert('Save failed: ' + (json && json.error ? json.error : 'Unknown'));
-      return;
-    }
-    alert('Saved! Updated shows.json at: ' + (json.url || 'remote'));
-  } catch (e) {
-    console.error(e);
-    alert('Save error: ' + String(e));
-  }
-}
+    document.getElementById('showName').value='';
+    document.getElementById('showDate').value='';
+    document.getElementById('showLink').value='';
+    loadCurrentShows();
+    alert('Show added!');
+  } catch(err){ alert('Error saving show'); console.error(err); }
+});
+
+loadCurrentShows();
 </script>
 </body>
 </html>
