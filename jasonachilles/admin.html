@@ -4,34 +4,41 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Jason Achilles Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 <style>
-body { background:#000; color:#0ff; font-family:'Orbitron',sans-serif; margin:0; padding:0; }
-h1 { text-align:center; font-size:2.5rem; margin-bottom:20px; text-shadow:0 0 12px #0ff; }
+body { margin:0; padding:0; font-family:'Orbitron',sans-serif; background:#000; color:#0ff; }
+h1 { text-align:center; font-size:2.5rem; margin-bottom:20px; text-shadow:0 0 20px #0ff; }
 a.back-link { display:block; text-align:center; margin:20px 0; color:#0ff; text-decoration:none; font-weight:bold; }
 a.back-link:hover { color:#0cc; }
-form { max-width:500px; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
+form { max-width:500px; margin:0 auto; display:flex; flex-direction:column; gap:15px; padding:20px; background:rgba(0,255,255,0.05); border-radius:12px; box-shadow:0 0 20px rgba(0,255,255,0.2); }
 input, button { padding:10px; border-radius:6px; border:none; font-family:'Orbitron',sans-serif; font-size:1rem; }
 button { background:#0ff; color:#000; font-weight:bold; cursor:pointer; transition:0.2s; }
 button:hover { background:#0cc; }
-ul { margin-top:20px; list-style:none; padding-left:0; max-width:600px; margin-left:auto; margin-right:auto; }
-li { margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; padding:6px 10px; border:1px solid rgba(0,255,255,0.4); border-radius:8px; transition:0.2s; }
+ul { margin-top:20px; list-style:none; padding-left:0; max-width:600px; margin:20px auto; }
+li { margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid rgba(0,255,255,0.3); border-radius:8px; transition:0.2s; }
 li:hover { box-shadow:0 0 20px rgba(0,255,255,0.3); }
-.delete-btn { background:#ff0066; color:#fff; border:none; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:bold; }
+.delete-btn { background:#ff0066; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:bold; }
 .delete-btn:hover { background:#ff3399; }
-.password-screen { display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; text-align:center; background: radial-gradient(ellipse at center, rgba(0,255,255,0.05), #000 80%); }
-.password-screen h2 { font-size:2rem; margin-bottom:20px; text-shadow:0 0 12px #0ff; }
-.password-screen input { font-size:1.2rem; width:250px; text-align:center; border-radius:6px; border:none; padding:10px; }
-.password-screen button { margin-top:10px; font-size:1.1rem; padding:8px; border-radius:6px; border:none; cursor:pointer; background:#0ff; color:#000; font-weight:bold; transition:0.2s; }
+
+/* Password screen */
+.password-screen { display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; text-align:center; background: radial-gradient(circle at center, rgba(0,255,255,0.05), #000 90%); }
+.password-screen h2 { font-size:2.5rem; margin-bottom:30px; text-shadow: 0 0 15px #0ff, 0 0 40px #0cc, 0 0 70px #0ff; letter-spacing:2px; }
+.password-screen input { font-size:1.3rem; width:280px; text-align:center; border-radius:6px; border:none; padding:10px; background:rgba(0,255,255,0.05); color:#0ff; text-shadow:0 0 8px #0ff; }
+.password-screen button { margin-top:15px; font-size:1.1rem; padding:10px; border-radius:6px; border:none; cursor:pointer; background:#0ff; color:#000; font-weight:bold; text-shadow:0 0 6px #0ff; transition:0.2s; }
 .password-screen button:hover { background:#0cc; }
+
+/* Tron/futuristic animation */
+@keyframes glow { 0% { text-shadow:0 0 5px #0ff;} 50% { text-shadow:0 0 20px #0ff, 0 0 40px #0cc;} 100% { text-shadow:0 0 5px #0ff;} }
+h1, .back-link { animation: glow 2s infinite alternate; }
 </style>
 </head>
 <body>
 
 <!-- Password Screen -->
 <div id="passwordScreen" class="password-screen">
-  <h2>Welcome, Space Roadie Admin</h2>
-  <input type="password" id="adminPasswordInput" placeholder="Enter password"/>
-  <button onclick="checkPassword()">Enter</button>
+  <h2>Enter the Cosmic Key</h2>
+  <input type="password" id="adminPasswordInput" placeholder="Cosmic Key"/>
+  <button onclick="checkPassword()">Access the Grid</button>
 </div>
 
 <!-- Admin UI -->
@@ -50,7 +57,7 @@ li:hover { box-shadow:0 0 20px rgba(0,255,255,0.3); }
 </div>
 
 <script>
-const PASSWORD = "danascullyiloveu"; // you can move this to Netlify env var for security
+const PASSWORD = "danascullyiloveu"; // hardcoded; can move to Netlify env var
 const form = document.getElementById('adminForm');
 const list = document.getElementById('currentShows');
 
@@ -61,23 +68,23 @@ function checkPassword() {
     document.getElementById('adminUI').style.display = 'block';
     loadCurrentShows();
   } else {
-    alert('Wrong password!');
+    alert('Wrong Cosmic Key!');
   }
 }
 
-// Load shows and render with delete buttons
+// Fetch and render shows
 async function loadCurrentShows() {
   try {
-    const res = await fetch('shows.json');
+    const res = await fetch('/shows.json');
     const shows = await res.json();
     list.innerHTML = '';
-    shows.forEach((s, index) => {
+    shows.forEach((s, i) => {
       const li = document.createElement('li');
       li.innerHTML = `<span>${s.name} - ${s.date} <a href="${s.link}" target="_blank">More info</a></span>`;
       const delBtn = document.createElement('button');
       delBtn.textContent = 'Delete';
       delBtn.className = 'delete-btn';
-      delBtn.onclick = () => deleteShow(index);
+      delBtn.onclick = () => deleteShow(i);
       li.appendChild(delBtn);
       list.appendChild(li);
     });
@@ -104,9 +111,7 @@ form.addEventListener('submit', async e => {
         show: { name, date, link }
       })
     });
-    document.getElementById('showName').value='';
-    document.getElementById('showDate').value='';
-    document.getElementById('showLink').value='';
+    form.reset();
     loadCurrentShows();
   } catch(err){
     alert('Error saving show');
