@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contact - Jason Achilles</title>
+<style>
+body {
+  font-family:'Orbitron',sans-serif;
+  background:black; color:#0ff; padding:40px;
+  text-align:center;
+}
+form {
+  max-width:500px; margin:40px auto;
+  display:flex; flex-direction:column; gap:15px;
+  background:rgba(0,0,0,0.6); padding:25px;
+  border:1px solid #0ff; border-radius:10px;
+}
+input, textarea {
+  padding:12px; border-radius:6px; border:none;
+  font-size:1rem;
+}
+button {
+  padding:12px; border:none; border-radius:6px;
+  background:#0ff; color:#000; font-weight:bold;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+<h1>Contact Jason</h1>
+
+<form method="POST" action="https://formsubmit.co/jmezilis@gmail.com">
+  <input type="hidden" name="_captcha" value="false">
+  <input type="text" name="name" placeholder="Your Name" required>
+  <input type="email" name="email" placeholder="Your Email" required>
+  <textarea name="message" rows="6" placeholder="Your Message" required></textarea>
+  <button type="submit">Send Message</button>
+</form>
+
+</body>
+</html>
