@@ -153,26 +153,66 @@ section h2 { margin-bottom:20px; text-shadow:0 0 10px #0ff; color:#0ff; }
   }
   .visor {
     background:none !important;
+@media (max-width: 768px) {
+  .visor { 
+    background:none !important;
+    position:relative; 
+    top:auto; left:auto; 
+    transform:none; 
+    width:100vw; 
+    height:auto; 
+    border-radius:0; 
+    border:none; 
+    overflow:visible; 
+    padding-bottom:60px; 
   }
-}
 
-}
-  }
-  .visor { background:none; position:relative; top:auto; left:auto; transform:none; width:100vw; height:auto; border-radius:0; border:none; overflow:visible; padding-bottom:60px; }
   nav { display:none; }
-  .menu-button { display:block; position:fixed; top:10px; left:10px; z-index:100; background: rgba(0,255,255,0.8); color:#000; padding:10px; border-radius:6px; cursor:pointer; font-weight:bold; }
-  .side-menu { display:flex; position:fixed; top:0; left:-250px; width:250px; height:100%; background: rgba(0,0,0,0.95); flex-direction:column; gap:20px; padding:50px 20px; transition:left .3s ease; z-index:99; }
+
+  .menu-button { 
+    display:block; 
+    position:fixed; 
+    top:10px; 
+    left:10px; 
+    z-index:100; 
+    background: rgba(0,255,255,0.8); 
+    color:#000; 
+    padding:10px; 
+    border-radius:6px; 
+    cursor:pointer; 
+    font-weight:bold; 
+  }
+
+  .side-menu { 
+    display:flex; 
+    position:fixed; 
+    top:0; 
+    left:-250px; 
+    width:250px; 
+    height:100%; 
+    background: rgba(0,0,0,0.95); 
+    flex-direction:column; 
+    gap:20px; 
+    padding:50px 20px; 
+    transition:left .3s ease; 
+    z-index:99; 
+  }
+
   .side-menu a { color:#0ff; text-decoration:none; font-size:1.2rem; }
-  .side-menu a:hover { color:#0cc; }
+
   .side-menu .listen-now { display:flex; flex-direction:column; gap:12px; margin-top:20px; }
-  .side-menu .listen-now a { padding:8px 12px; background:#0ff; color:#000; border-radius:6px; font-weight:bold; text-align:center; }
+
   section { margin-top:80px; margin-bottom:80px; }
-  .video-grid, .merch-grid { grid-template-columns:1fr; }
-  .merch-item img { width:120px; height:120px; }
+
+  .video-grid { grid-template-columns:1fr 1fr; } /* ← Fixes your 2x2 grid */
+  .merch-grid { grid-template-columns:1fr; }
+
   .hud { flex-direction:row; gap:8px; bottom:5px; font-size:0.8rem; }
   .hud div { padding:4px 6px; }
+
   .desktop-only { display:none; }
 }
+
 /* MOBILE MENU (only visible on mobile) */
 .menu-button, #sideMenu {
   display: none;
@@ -303,11 +343,16 @@ section h2 { margin-bottom:20px; text-shadow:0 0 10px #0ff; color:#0ff; }
     </section>
 
     <!-- HUD -->
-   <div class="hud">
-<a href="https://mars.nasa.gov/mars2020/spacecraft/instruments/supercam/microphone/" target="_blank" rel="noopener">Hear Mars</a>
+ <div class="hud">
+  <div onclick="window.open('https://soundcloud.com/nasa/sets/sounds-from-mars)">
+    Listen to Mars
+  </div>
 
-<a href="https://www.nasa.gov/directorates/stmd/technology-demonstration/iss-microphone/" target="_blank" rel="noopener">ISS Microphone</a>
->
+  <div onclick="window.open('https://www.isstracker.com/', '_blank')">
+    🛰 ISS Tracker
+  </div>
+</div>
+
   <div <a href="contact.html">Contact</a>
 </div>
 </div>
