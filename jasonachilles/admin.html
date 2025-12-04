@@ -4,10 +4,9 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Jason Achilles Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 <style>
 body { background:#000; color:#0ff; font-family:'Orbitron',sans-serif; margin:0; padding:0; }
-h1 { text-align:center; font-size:2.5rem; margin-bottom:20px; text-shadow:0 0 20px #0ff; }
+h1 { text-align:center; font-size:2.5rem; margin-bottom:20px; text-shadow:0 0 12px #0ff; }
 a.back-link { display:block; text-align:center; margin:20px 0; color:#0ff; text-decoration:none; font-weight:bold; }
 a.back-link:hover { color:#0cc; }
 form { max-width:500px; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
@@ -19,9 +18,9 @@ li { margin-bottom:12px; display:flex; justify-content:space-between; align-item
 li:hover { box-shadow:0 0 20px rgba(0,255,255,0.3); }
 .delete-btn { background:#ff0066; color:#fff; border:none; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:bold; }
 .delete-btn:hover { background:#ff3399; }
-.password-screen { display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; text-align:center; background: radial-gradient(circle at center, rgba(0,255,255,0.05), #000 80%); }
-.password-screen h2 { font-size:2rem; margin-bottom:20px; text-shadow:0 0 20px #0ff; }
-.password-screen input { font-size:1.2rem; width:250px; text-align:center; border-radius:6px; border:none; padding:10px; background:#000; color:#0ff; box-shadow:0 0 8px #0ff inset; }
+.password-screen { display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; text-align:center; background: radial-gradient(ellipse at center, rgba(0,255,255,0.05), #000 80%); }
+.password-screen h2 { font-size:2rem; margin-bottom:20px; text-shadow:0 0 12px #0ff; }
+.password-screen input { font-size:1.2rem; width:250px; text-align:center; border-radius:6px; border:none; padding:10px; }
 .password-screen button { margin-top:10px; font-size:1.1rem; padding:8px; border-radius:6px; border:none; cursor:pointer; background:#0ff; color:#000; font-weight:bold; transition:0.2s; }
 .password-screen button:hover { background:#0cc; }
 </style>
@@ -31,8 +30,8 @@ li:hover { box-shadow:0 0 20px rgba(0,255,255,0.3); }
 <!-- Password Screen -->
 <div id="passwordScreen" class="password-screen">
   <h2>Enter the Cosmic Key</h2>
-  <input type="password" id="adminPasswordInput" placeholder="Your cosmic key"/>
-  <button onclick="checkPassword()">Unlock</button>
+  <input type="password" id="adminPasswordInput" placeholder="Enter password"/>
+  <button onclick="checkPassword()">Enter</button>
 </div>
 
 <!-- Admin UI -->
@@ -51,7 +50,7 @@ li:hover { box-shadow:0 0 20px rgba(0,255,255,0.3); }
 </div>
 
 <script>
-const PASSWORD = "danascullyiloveu"; // optional: move to Netlify env var for security
+const PASSWORD = "danascullyiloveu";
 const form = document.getElementById('adminForm');
 const list = document.getElementById('currentShows');
 
@@ -62,20 +61,25 @@ function checkPassword() {
     document.getElementById('adminUI').style.display = 'block';
     loadCurrentShows();
   } else {
-    alert('Wrong Cosmic Key!');
+    alert('Wrong password!');
   }
 }
 
-// Fetch shows via serverless function
 async function loadCurrentShows() {
   try {
-    const res = await fetch('/.netlify/functions/save-shows', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ pass: PASSWORD, action: 'list' })
+    const res = await fetch('shows.json');
+    const shows = await res.json();
+    list.innerHTML = '';
+    shows.forEach((s, index) => {
+      const li = document.createElement('li');
+      li.innerHTML = `<span>${s.name} - ${s.date} <a href="${s.link}" target="_blank">More info</a></span>`;
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Delete';
+      delBtn.className = 'delete-btn';
+      delBtn.onclick = () => deleteShow(index);
+      li.appendChild(delBtn);
+      list.appendChild(li);
     });
-    const data = await res.json();
-    renderShows(data.shows || []);
   } catch(e){
     console.error(e);
     list.innerHTML = '<li>No shows yet.</li>';
@@ -89,7 +93,7 @@ form.addEventListener('submit', async e => {
   const link = document.getElementById('showLink').value;
 
   try {
-    const res = await fetch('/.netlify/functions/save-shows', {
+    await fetch('/.netlify/functions/save-shows', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -98,9 +102,10 @@ form.addEventListener('submit', async e => {
         show: { name, date, link }
       })
     });
-    const data = await res.json();
-    form.reset();
-    renderShows(data.shows);
+    document.getElementById('showName').value='';
+    document.getElementById('showDate').value='';
+    document.getElementById('showLink').value='';
+    loadCurrentShows();
   } catch(err){
     alert('Error saving show');
     console.error(err);
@@ -110,7 +115,7 @@ form.addEventListener('submit', async e => {
 async function deleteShow(index){
   if(!confirm('Delete this show?')) return;
   try {
-    const res = await fetch('/.netlify/functions/save-shows', {
+    await fetch('/.netlify/functions/save-shows', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -119,26 +124,11 @@ async function deleteShow(index){
         index
       })
     });
-    const data = await res.json();
-    renderShows(data.shows);
+    loadCurrentShows();
   } catch(err){
     alert('Error deleting show');
     console.error(err);
   }
-}
-
-function renderShows(shows) {
-  list.innerHTML = '';
-  shows.forEach((s, i) => {
-    const li = document.createElement('li');
-    li.innerHTML = `<span>${s.name} - ${s.date} <a href="${s.link}" target="_blank">More info</a></span>`;
-    const delBtn = document.createElement('button');
-    delBtn.textContent = 'Delete';
-    delBtn.className = 'delete-btn';
-    delBtn.onclick = () => deleteShow(i);
-    li.appendChild(delBtn);
-    list.appendChild(li);
-  });
 }
 </script>
 </body>

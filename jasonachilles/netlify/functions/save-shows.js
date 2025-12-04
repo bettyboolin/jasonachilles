@@ -6,16 +6,24 @@ exports.handler = async function(event, context) {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  const password = "danascullyiloveu"; 
-  const { pass, action, show, index } = JSON.parse(event.body);
+  const PASSWORD = "danascullyiloveu";
+  let body;
 
-  if (pass !== password) {
+  try {
+    body = JSON.parse(event.body);
+  } catch {
+    return { statusCode: 400, body: 'Invalid JSON' };
+  }
+
+  const { pass, action, show, index } = body;
+
+  if (pass !== PASSWORD) {
     return { statusCode: 401, body: 'Unauthorized' };
   }
 
   const showsFile = path.join(__dirname, '../../shows.json');
-
   let currentShows = [];
+
   try {
     const data = fs.readFileSync(showsFile, 'utf8');
     currentShows = JSON.parse(data);
@@ -24,12 +32,10 @@ exports.handler = async function(event, context) {
   }
 
   try {
-    if(action === 'add' && show){
+    if (action === 'add' && show) {
       currentShows.push(show);
-    } else if(action === 'delete' && typeof index === 'number'){
-      currentShows.splice(index,1);
-    } else if(action === 'list'){
-      // just return current shows
+    } else if (action === 'delete' && typeof index === 'number') {
+      currentShows.splice(index, 1);
     } else {
       return { statusCode: 400, body: 'Invalid action or missing data' };
     }
@@ -38,10 +44,10 @@ exports.handler = async function(event, context) {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message:'Success', shows: currentShows })
+      body: JSON.stringify({ message: 'Success', shows: currentShows }),
     };
-  } catch(err){
+  } catch (err) {
     console.error(err);
-    return { statusCode: 500, body: 'Error updating shows: '+err.message };
+    return { statusCode: 500, body: 'Error updating shows: ' + err.message };
   }
 };
