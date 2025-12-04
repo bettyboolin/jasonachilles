@@ -1,91 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Jason Achilles Admin</title>
-<style>
-body { background:#000; color:#0ff; font-family:'Orbitron',sans-serif; margin:0; padding:0; }
-h1 { text-align:center; font-size:2.5rem; margin-bottom:20px; text-shadow:0 0 12px #0ff; }
-a.back-link { display:block; text-align:center; margin:20px 0; color:#0ff; text-decoration:none; font-weight:bold; }
-a.back-link:hover { color:#0cc; }
-form { max-width:500px; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
-input, button { padding:10px; border-radius:6px; border:none; font-family:'Orbitron',sans-serif; font-size:1rem; }
-button { background:#0ff; color:#000; font-weight:bold; cursor:pointer; transition:0.2s; }
-button:hover { background:#0cc; }
-ul { margin-top:20px; list-style:none; padding-left:0; max-width:600px; margin-left:auto; margin-right:auto; }
-li { margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; padding:6px 10px; border:1px solid rgba(0,255,255,0.4); border-radius:8px; transition:0.2s; }
-li:hover { box-shadow:0 0 20px rgba(0,255,255,0.3); }
-.delete-btn { background:#ff0066; color:#fff; border:none; padding:4px 8px; border-radius:6px; cursor:pointer; font-weight:bold; }
-.delete-btn:hover { background:#ff3399; }
-.password-screen { display:flex; flex-direction:column; justify-content:center; align-items:center; height:100vh; text-align:center; background: radial-gradient(ellipse at center, rgba(0,255,255,0.05), #000 80%); }
-.password-screen h2 { font-size:2rem; margin-bottom:20px; text-shadow:0 0 12px #0ff; }
-.password-screen input { font-size:1.2rem; width:250px; text-align:center; border-radius:6px; border:none; padding:10px; }
-.password-screen button { margin-top:10px; font-size:1.1rem; padding:8px; border-radius:6px; border:none; cursor:pointer; background:#0ff; color:#000; font-weight:bold; transition:0.2s; }
-.password-screen button:hover { background:#0cc; }
-</style>
-</head>
-<body>
-
-<!-- Password Screen -->
-<div id="passwordScreen" class="password-screen">
-  <h2>Enter the Cosmic Key</h2>
-  <input type="password" id="adminPasswordInput" placeholder="Enter password"/>
-  <button onclick="checkPassword()">Enter</button>
-</div>
-
-<!-- Admin UI -->
-<div id="adminUI" style="display:none;">
-  <a href="index.html" class="back-link">← Back to Website</a>
-  <h1>Admin - Edit Shows</h1>
-
-  <form id="adminForm">
-    <input type="text" id="showName" placeholder="Show Name" required>
-    <input type="date" id="showDate" required>
-    <input type="url" id="showLink" placeholder="Link to venue/info" required>
-    <button type="submit">Add Show</button>
-  </form>
-
-  <ul id="currentShows"></ul>
-</div>
-
-<script>
-const PASSWORD = "danascullyiloveu";
-const form = document.getElementById('adminForm');
-const list = document.getElementById('currentShows');
-
-function checkPassword() {
-  const val = document.getElementById('adminPasswordInput').value;
-  if(val === PASSWORD){
-    document.getElementById('passwordScreen').style.display = 'none';
-    document.getElementById('adminUI').style.display = 'block';
-    loadCurrentShows();
-  } else {
-    alert('Wrong password!');
-  }
-}
-
-async function loadCurrentShows() {
-  try {
-    const res = await fetch('shows.json');
-    const shows = await res.json();
-    list.innerHTML = '';
-    shows.forEach((s, index) => {
-      const li = document.createElement('li');
-      li.innerHTML = `<span>${s.name} - ${s.date} <a href="${s.link}" target="_blank">More info</a></span>`;
-      const delBtn = document.createElement('button');
-      delBtn.textContent = 'Delete';
-      delBtn.className = 'delete-btn';
-      delBtn.onclick = () => deleteShow(index);
-      li.appendChild(delBtn);
-      list.appendChild(li);
-    });
-  } catch(e){
-    console.error(e);
-    list.innerHTML = '<li>No shows yet.</li>';
-  }
-}
-
 form.addEventListener('submit', async e => {
   e.preventDefault();
   const name = document.getElementById('showName').value;
@@ -93,7 +5,7 @@ form.addEventListener('submit', async e => {
   const link = document.getElementById('showLink').value;
 
   try {
-    await fetch('/.netlify/functions/save-shows', {
+    const res = await fetch('/.netlify/functions/save-shows', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -102,34 +14,21 @@ form.addEventListener('submit', async e => {
         show: { name, date, link }
       })
     });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Server returned ${res.status}: ${text}`);
+    }
+
+    const data = await res.json();
+    console.log('Success:', data);
+
     document.getElementById('showName').value='';
     document.getElementById('showDate').value='';
     document.getElementById('showLink').value='';
     loadCurrentShows();
   } catch(err){
-    alert('Error saving show');
+    alert('Error saving show. Check console for details.');
     console.error(err);
   }
 });
-
-async function deleteShow(index){
-  if(!confirm('Delete this show?')) return;
-  try {
-    await fetch('/.netlify/functions/save-shows', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        pass: PASSWORD,
-        action:'delete',
-        index
-      })
-    });
-    loadCurrentShows();
-  } catch(err){
-    alert('Error deleting show');
-    console.error(err);
-  }
-}
-</script>
-</body>
-</html>
