@@ -14,6 +14,8 @@
 <meta name="twitter:card" content="summary_large_image"/>
 
 <style>
+
+
 /* === RESET === */
 * { margin:0; padding:0; box-sizing:border-box; }
 html, body {
@@ -237,6 +239,7 @@ section h2 { margin-bottom:20px; color:#0ff; text-shadow:0 0 10px #0ff; }
 .merch-locked .placeholder { position: relative; z-index:1; }
 
 /* === HUD FIXED === */
+
 .hud {
   position: fixed;
   bottom: 40px;
@@ -264,8 +267,17 @@ section h2 { margin-bottom:20px; color:#0ff; text-shadow:0 0 10px #0ff; }
 }
 
 /* === MOBILE === */
+/* MOBILE FIX */
 @media (max-width:768px) {
-  .visor { background:none !important; position:relative; transform:none; width:100vw; height:auto; border:none; border-radius:0; }
+  .visor {
+    background: url("https://cdn.pixabay.com/photo/2023/07/24/11/03/ai-generated-8146849_1280.jpg") center top / cover no-repeat fixed;
+    position: relative;
+    transform:none;
+    width:100vw;
+    height:100vh;
+    border:none;
+    border-radius:0;
+  }
   nav { display:none; }
   .desktop-only { display:none; }
   .menu-button { display:block; }
@@ -311,7 +323,9 @@ section h2 { margin-bottom:20px; color:#0ff; text-shadow:0 0 10px #0ff; }
     </nav>
 
     <!-- HERO -->
+
     <div class="hero">
+
       <h1>Jason Achilles</h1>
       <p>Analog Sci-Fi Rock | Cinematic Soundscapes</p>
     </div>
@@ -389,6 +403,7 @@ document.addEventListener('DOMContentLoaded', loadShows);
 </script>
 
 <style>
+
 /* Neon visor style for show list */
 #showsList {
   list-style: none;
@@ -503,6 +518,7 @@ document.addEventListener('DOMContentLoaded', loadShows);
   <div onclick="window.open('https://soundcloud.com/nasa/sets/sounds-from-mars', '_blank')">Listen to Mars</div>
   <div id="hudISS" onclick="window.open('https://www.isstracker.com/', '_blank')">ISS Tracker</div>
   <div onclick="window.open('contact.html', '_blank')">Contact</div>
+
 </div>
 
 <script>
