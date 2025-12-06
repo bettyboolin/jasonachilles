@@ -293,7 +293,6 @@ section h2 { margin-bottom:20px; color:#0ff; text-shadow:0 0 10px #0ff; }
       <a href="#videos" onclick="toggleMenu()">Videos</a>
       <a href="#merch" onclick="toggleMenu()">Merch</a>
       <a href="#about" onclick="toggleMenu()">About</a>
-      <a href="admin.html" onclick="toggleMenu()">Admin</a>
 
       <div class="listen-now">
         <a href="https://open.spotify.com/artist/6ZmdI39EPLuZ7tcnaCIMnQ" target="_blank">Spotify</a>
@@ -309,7 +308,6 @@ section h2 { margin-bottom:20px; color:#0ff; text-shadow:0 0 10px #0ff; }
       <a href="#videos">Videos</a>
       <a href="#merch">Merch</a>
       <a href="#about">About</a>
-      <a href="admin.html">Admin</a>
     </nav>
 
     <!-- HERO -->
@@ -326,13 +324,77 @@ section h2 { margin-bottom:20px; color:#0ff; text-shadow:0 0 10px #0ff; }
       <a href="https://www.instagram.com/jasonachillesmezilis/" target="_blank">Instagram</a>
     </div>
 
-    <!-- SHOWS -->
-    <section id="shows">
-      <div class="placeholder">
-        <h2>Upcoming Shows</h2>
-        <ul id="showsList"></ul>
-      </div>
-    </section>
+<!-- SHOWS -->
+<section id="shows">
+  <div class="placeholder">
+    <h2>Upcoming Shows</h2>
+    <ul id="showsList"></ul>
+  </div>
+</section>
+
+<script>
+const calendarId = 'de7dca17d4690a1aa81bdeaa3c38f61f7a643d9626551fc24f881d09a3813237@group.calendar.google.com';
+const apiKey = 'AIzaSyDfByNbuQAj5lOlzyYuzw6AhAMEixGjZq4';
+const maxEvents = 10;
+
+async function loadShowsFromCalendar() {
+  try {
+    const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/${calendarId}/events?key=${apiKey}&orderBy=startTime&singleEvents=true&maxResults=${maxEvents}&timeMin=${new Date().toISOString()}`);
+    const data = await res.json();
+    const ul = document.getElementById('showsList');
+    ul.innerHTML = '';
+
+    data.items.forEach(event => {
+      const li = document.createElement('li');
+      const date = new Date(event.start.dateTime || event.start.date);
+
+      // Grab URL from description if present
+      const urlMatch = event.description?.match(/https?:\/\/\S+/);
+      const link = urlMatch ? urlMatch[0] : event.htmlLink;
+
+      li.innerHTML = `<a href="${link}" target="_blank"><strong>${event.summary}</strong></a> — ${date.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'})}`;
+      ul.appendChild(li);
+    });
+
+    if(data.items.length === 0) {
+      ul.innerHTML = '<li>No shows available</li>';
+    }
+
+  } catch(err) {
+    console.error(err);
+    document.getElementById('showsList').innerHTML = '<li>No shows available</li>';
+  }
+}
+
+// Load shows on page load
+loadShowsFromCalendar();
+</script>
+
+<style>
+/* Neon visor style for show list */
+#showsList {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0 0;
+}
+
+#showsList li {
+  margin: 12px 0;
+  font-size: 1.1rem;
+  color: #0ff;
+  text-shadow: 0 0 6px #0ff;
+  transition: text-shadow 0.2s ease;
+}
+
+#showsList li a {
+  color: #0ff;
+  text-decoration: none;
+}
+
+#showsList li a:hover {
+  text-shadow: 0 0 14px #0ff;
+}
+</style>
 
     <!-- VIDEOS -->
     <section id="videos">
@@ -410,7 +472,7 @@ section h2 { margin-bottom:20px; color:#0ff; text-shadow:0 0 10px #0ff; }
              alt="Jason and Forrest"
              style="width:90%; max-width:500px; border-radius:15px; margin-bottom:20px;">
         <div class="about-text">
-          Jason Achilles & Forrest Mitchell are a raw, analog rock duo forging cinematic soundtracks from vintage synths and live drums. Known for their raw guitar tone and sci-fi textures, they mix analog grit with space-age atmosphere — recorded live, no backing tracks.
+          Jason Achilles & Forrest Mitchell are an analog rock duo forging cinematic soundtracks from vintage synths and live drums. Known for their raw guitar tone and sci-fi textures, they mix tactile grit with space-age atmosphere — recorded live, no backing tracks.
         </div>
       </div>
     </section>
