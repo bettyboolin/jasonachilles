@@ -267,27 +267,39 @@ section h2 { margin-bottom:20px; color:#0ff; text-shadow:0 0 10px #0ff; }
 }
 
 /* === MOBILE === */
-/* MOBILE FIX */
+/* MOBILE FIXED LAYOUT */
 @media (max-width:768px) {
   .visor {
+    position: relative !important;  /* let it flow normally */
+    top: auto;
+    left: auto;
+    transform: none !important;
+    width: 100vw !important;
+    height: 100vh !important;      /* fill full screen */
+    border-radius: 0 !important;
+    overflow-y: auto;
     background: url("https://cdn.pixabay.com/photo/2023/07/24/11/03/ai-generated-8146849_1280.jpg") center top / cover no-repeat fixed;
-    position: relative;
-    transform:none;
-    width:100vw;
-    height:100vh;
-    border:none;
-    border-radius:0;
   }
-  nav { display:none; }
-  .desktop-only { display:none; }
-  .menu-button { display:block; }
-  .side-menu { display:flex; }
-  .video-grid { grid-template-columns:1fr 1fr; }
-  .merch-grid { grid-template-columns:1fr; }
+  
+  nav { display: none; }             /* keep mobile nav hidden */
+  .desktop-only { display: none; }
+  .menu-button { display: block; }
+  .side-menu { display: flex; left: -250px; transition: left 0.3s ease; }
+
+  /* Video & merch grids responsive */
+  .video-grid { grid-template-columns: 1fr; }
+  .merch-grid { grid-template-columns: 1fr; }
+  
+  /* Make hero and content centered */
+  .content {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .hero h1 { font-size: 2.5rem; }
+  .hero p { font-size: 1rem; margin-bottom: 40px; }
 }
-@media (max-width:600px) {
-  .video-grid { grid-template-columns:1fr; }
-}
+
 </style>
 </head>
 
